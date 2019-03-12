@@ -5,7 +5,7 @@ class Timber < Formula
   sha256 "ecc8474d006643d168c39dfb4030f31bd65d448433c990b8c8a8df0dcd3daea2"
 
   def install
-    bin.install Dir["bin/*.sh"]
+    bin.install "bin/timber"
   end
 
   test do
