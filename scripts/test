@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -ex
+
+brew update
+brew install Formula/timber.rb
+timber version
+timber help
