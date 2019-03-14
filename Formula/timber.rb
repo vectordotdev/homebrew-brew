@@ -1,9 +1,9 @@
 class Timber < Formula
   desc "Timber.io CLI - Live tail and search your logs"
   homepage "https://github.com/timberio/cli"
-  url "https://packages.timber.io/cli/0.0.1/amd64/timber-0.0.1-darwin-amd64.tar.gz"
-  sha256 "ecc8474d006643d168c39dfb4030f31bd65d448433c990b8c8a8df0dcd3daea2"
-
+  url "https://packages.timber.io/cli/0.1.0/amd64/timber-0.1.0-darwin-amd64.tar.gz"
+  sha256 "cdcea433106f10190146bb0a7ae651a51057a4a3fc0fd51b55110777080cd34e"
+  
   def install
     bin.install "bin/timber"
   end
