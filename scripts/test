@@ -6,3 +6,7 @@ brew update
 brew install Formula/timber.rb
 timber version
 timber help
+
+brew install Formula/vector.rb
+vector -V
+vector --help
