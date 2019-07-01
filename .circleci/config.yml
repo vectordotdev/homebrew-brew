@@ -11,7 +11,7 @@ jobs:
       - run: |
           brew update
           brew cleanup
-          ./scripts/test
+          sudo ./scripts/test
 
 workflows:
   version: 2
