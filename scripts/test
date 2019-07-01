@@ -4,9 +4,9 @@ set -ex
 
 brew update
 brew install Formula/timber.rb
-timber version
+timber -v
 timber help
 
 brew install Formula/vector.rb
-vector -V
+brew test vector
 vector --help
