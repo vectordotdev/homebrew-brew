@@ -2,6 +2,7 @@ class Vector < Formula
   desc "A High-Performance Log, Metrics, and Events Router"
   homepage "https://github.com/timberio/vector"
   url "https://packages.timber.io/vector/0.4.0/vector-x86_64-apple-darwin.tar.gz"
+  version "0.4.0"
   sha256 "0b51a8858dbed5c6c525bab713c86c97e8b43e2c4e0168753d504ad20e97c431"
   head "https://github.com/timberio/vector.git"
   
@@ -74,8 +75,8 @@ class Vector < Formula
   end
 
   test do
-    # output = shell_output("#{bin}/vector --version").chomp
-    # assert_equal "vector", output
+    output = shell_output("#{bin}/vector --version").chomp
+    assert_equal "vector", output
     system "false"
   end
 end
