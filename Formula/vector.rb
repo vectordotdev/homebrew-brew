@@ -11,7 +11,7 @@ class Vector < Formula
 
     # Set up Vector for local development
     inreplace "config/vector.toml" do |s|
-      s.gsub!(/data_dir = ".*"/, "data_dir: #{var}/lib/vector/")
+      s.gsub!(/data_dir = ".*"/, "data_dir = \"#{var}/lib/vector/\"")
     end
 
     # Move config files into etc
