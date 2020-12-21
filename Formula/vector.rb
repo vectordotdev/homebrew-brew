@@ -3,9 +3,9 @@ class Vector < Formula
   homepage "https://github.com/timberio/vector"
   url "https://packages.timber.io/vector/0.11.1/vector-0.11.1-x86_64-apple-darwin.tar.gz"
   version "0.11.1"
-  sha256 "af90177328047a3b79fa15647ea026c83ccb7f3d54a44e968edea49a71e70ee5"
+  sha256 "70fbec60052624e41319e99e9888a966a2ec350468c924ef14ae7354233762aa"
   head "https://github.com/timberio/vector.git"
-  
+
   def install
     bin.install "bin/vector"
 
@@ -16,7 +16,7 @@ class Vector < Formula
 
     # Move config files into etc
     (etc/"vector").install Dir["config/*"]
-    
+
     begin
       FileUtils.rm_rf("config")
     rescue
