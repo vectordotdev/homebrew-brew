@@ -1,11 +1,11 @@
-# Timber Homebrew Tap
+# Vector Homebrew Tap
 
-Install the Timber tap with:
+Install the Vector tap with:
 
-    $ brew tap timberio/brew
+    $ brew tap vectordotdev/brew
 
-Then proceed to install Timber brews:
+Then proceed to install Vector brews:
 
     $ brew install vector
 
-For more information, visit https://github.com/timberio/cli
+For more information, visit https://github.com/vectordotdev/vector
