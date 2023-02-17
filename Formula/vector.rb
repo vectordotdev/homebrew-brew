@@ -40,38 +40,12 @@ class Vector < Formula
     s
   end
 
-  plist_options :manual => "vector"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>KeepAlive</key>
-          <false/>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>ProgramArguments</key>
-          <array>
-            <string>#{opt_bin}/vector</string>
-            <string>--config</string>
-            <string>#{etc}/vector/vector.toml</string>
-          </array>
-          <key>EnvironmentVariables</key>
-          <dict>
-          </dict>
-          <key>RunAtLoad</key>
-          <true/>
-          <key>WorkingDirectory</key>
-          <string>#{var}</string>
-          <key>StandardErrorPath</key>
-          <string>#{var}/log/vector.log</string>
-          <key>StandardOutPath</key>
-          <string>#{var}/log/vector.log</string>
-        </dict>
-      </plist>
-    EOS
+  service do
+    run [opt_bin/"vector", "--config", etc/"vector/vector.toml"]
+    keep_alive false
+    working_dir var
+    error_log_path var/"log/vector.log"
+    environment_variables {}
   end
 
   test do
