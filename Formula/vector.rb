@@ -1,9 +1,9 @@
 class Vector < Formula
   desc "A High-Performance Log, Metrics, and Events Router"
   homepage "https://github.com/timberio/vector"
-  url "https://packages.timber.io/vector/0.31.0/vector-0.31.0-x86_64-apple-darwin.tar.gz"
-  version "0.31.0"
-  sha256 "04bc55f0b5e784a367212a094c09e786ab5160d18431428e8f355c8477854724"
+  url "https://packages.timber.io/vector/0.32.0/vector-0.32.0-x86_64-apple-darwin.tar.gz"
+  version "0.32.0"
+  sha256 "eaeee70cda6fc9a597d546e571ae1dc80f6c434ac691e098c40a9d41d1793a0d"
   head "https://github.com/timberio/vector.git"
 
   def install
