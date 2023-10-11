@@ -41,7 +41,7 @@ class Vector < Formula
   end
 
   service do
-    run [opt_bin/"vector", "--config", etc/"vector/vector.toml"]
+    run [opt_bin/"vector", "--config", etc/"vector/vector.yaml"]
     keep_alive false
     working_dir var
     error_log_path var/"log/vector.log"
