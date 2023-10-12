@@ -10,9 +10,6 @@ class Vector < Formula
     bin.install "bin/vector"
 
     # Set up Vector for local development
-    inreplace "config/vector.toml" do |s|
-      s.gsub!(/data_dir = ".*"/, "data_dir = \"#{var}/lib/vector/\"")
-    end
     inreplace "config/vector.yaml" do |s|
       s.gsub!(/data_dir: ".*"/, "data_dir: \"#{var}/lib/vector/\"")
     end
