@@ -13,6 +13,9 @@ class Vector < Formula
     inreplace "config/vector.toml" do |s|
       s.gsub!(/data_dir = ".*"/, "data_dir = \"#{var}/lib/vector/\"")
     end
+    inreplace "config/vector.yaml" do |s|
+      s.gsub!(/data_dir: ".*"/, "data_dir: \"#{var}/lib/vector/\"")
+    end
 
     # Move config files into etc
     (etc/"vector").install Dir["config/*"]
@@ -41,7 +44,7 @@ class Vector < Formula
   end
 
   service do
-    run [opt_bin/"vector", "--config", etc/"vector/vector.toml"]
+    run [opt_bin/"vector", "--config", etc/"vector/vector.yaml"]
     keep_alive false
     working_dir var
     error_log_path var/"log/vector.log"
