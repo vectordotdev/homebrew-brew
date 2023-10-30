@@ -11,8 +11,7 @@ class Vector < Formula
 
     # Set up Vector for local development
     inreplace "config/vector.yaml" do |s|
-      # TODO: fix this for the v0.33.1 release by switching to valid YAML
-      s.gsub!(/data_dir = ".*"/, "data_dir = \"#{var}/lib/vector/\"")
+      s.gsub!(/data_dir: ".*"/, "data_dir: \"#{var}/lib/vector/\"")
     end
 
     # Move config files into etc
