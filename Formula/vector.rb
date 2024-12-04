@@ -3,7 +3,7 @@ class Vector < Formula
   homepage "https://github.com/timberio/vector"
   url "https://packages.timber.io/vector/0.43.0/vector-0.43.0-x86_64-apple-darwin.tar.gz"
   version "0.43.0"
-  sha256 "b9788bf822e73d94a3d1ea00b52b3372bf5e82499c0273215b8fc309fd03b3df"
+  sha256 "503e64b2fe35994c1b8c76b1ed778bae4cb2b3ba1e20893331d6cc0165e23559"
   head "https://github.com/timberio/vector.git"
 
   def install
