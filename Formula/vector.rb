@@ -1,9 +1,20 @@
 class Vector < Formula
   desc "A High-Performance Log, Metrics, and Events Router"
   homepage "https://github.com/timberio/vector"
-  url "https://packages.timber.io/vector/0.44.0/vector-0.44.0-x86_64-apple-darwin.tar.gz"
   version "0.44.0"
-  sha256 "49d629155c8934a317dad0456fffc8779b164a8a312bd3f16ae51e08f19bbc1a"
+
+  on_macos do
+    on_intel do
+      url "https://packages.timber.io/vector/0.44.0/vector-0.44.0-x86_64-apple-darwin.tar.gz"
+      sha256 "49d629155c8934a317dad0456fffc8779b164a8a312bd3f16ae51e08f19bbc1a" # x86_64-apple-darwin
+    end
+
+    on_arm do
+      url "https://packages.timber.io/vector/0.44.0/vector-0.44.0-arm64-apple-darwin.tar.gz"
+      sha256 "b05d9b8b624a99d6a0efdd904aed06485a3caf8ab85d4f7fc6636e8e0f2e126d" # arm64-apple-darwin
+    end
+  end
+
   head "https://github.com/timberio/vector.git"
 
   def install
@@ -51,6 +62,5 @@ class Vector < Formula
   test do
     output = shell_output("#{bin}/vector --version").chomp
     assert output.start_with?("vector ")
-    system "false"
   end
 end
