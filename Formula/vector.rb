@@ -62,6 +62,5 @@ class Vector < Formula
   test do
     output = shell_output("#{bin}/vector --version").chomp
     assert output.start_with?("vector ")
-    system "false"
   end
 end
