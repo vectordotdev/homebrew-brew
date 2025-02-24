@@ -1,7 +1,7 @@
 class Vector < Formula
   desc "A High-Performance Log, Metrics, and Events Router"
   homepage "https://github.com/timberio/vector"
-  version "0.44.0"
+  version "0.45.0"
 
   on_macos do
     on_intel do
