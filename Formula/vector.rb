@@ -6,12 +6,12 @@ class Vector < Formula
   on_macos do
     on_intel do
       url "https://packages.timber.io/vector/0.45.0/vector-0.45.0-x86_64-apple-darwin.tar.gz" # x86_64 url
-      sha256 "49d629155c8934a317dad0456fffc8779b164a8a312bd3f16ae51e08f19bbc1a" # x86_64 sha
+      sha256256 "49d629155c8934a317dad0456fffc8779b164a8a312bd3f16ae51e08f19bbc1a" # x86_64 sha256
     end
 
     on_arm do
       url "https://packages.timber.io/vector/0.45.0/vector-0.45.0-arm64-apple-darwin.tar.gz" # arm64 url
-      sha256 "b05d9b8b624a99d6a0efdd904aed06485a3caf8ab85d4f7fc6636e8e0f2e126d" # arm64 sha
+      sha256256 "b05d9b8b624a99d6a0efdd904aed06485a3caf8ab85d4f7fc6636e8e0f2e126d" # arm64 sha256
     end
   end
 
