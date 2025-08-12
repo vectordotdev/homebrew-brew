@@ -1,17 +1,17 @@
 class Vector < Formula
   desc "A High-Performance Log, Metrics, and Events Router"
   homepage "https://github.com/timberio/vector"
-  version "0.48.0"
+  version "0.49.0"
 
   on_macos do
     on_intel do
-      url "https://packages.timber.io/vector/0.48.0/vector-0.48.0-x86_64-apple-darwin.tar.gz" # x86_64 url
-      sha256 "5755489f0a438fa03c42991de9460bf2f4a8be8a3968ea1b6d75a4be858f3d13" # x86_64 sha256
+      url "https://packages.timber.io/vector/0.49.0/vector-0.49.0-x86_64-apple-darwin.tar.gz" # x86_64 url
+      sha256 "ab8f5be475648fe14e17c392525dca596ab35fd927e92c058970b1ea635f57ee" # x86_64 sha256
     end
 
     on_arm do
-      url "https://packages.timber.io/vector/0.48.0/vector-0.48.0-arm64-apple-darwin.tar.gz" # arm64 url
-      sha256 "41f52b776225f8dcd0f507384a466b8800b8ad7042c2499d0dc8cda86da5ed79" # arm64 sha256
+      url "https://packages.timber.io/vector/0.49.0/vector-0.49.0-arm64-apple-darwin.tar.gz" # arm64 url
+      sha256 "07a5122d0c82dd5961750338c4f10f53bcbc3744e11904a5026511647028032d" # arm64 sha256
     end
   end
 
