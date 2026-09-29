@@ -1,0 +1,115 @@
+name: Release Vector
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Stable Vector version to release (X.Y.Z)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-vector
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'vectordotdev/homebrew-brew'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Record base
+        id: base
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Update Vector formula
+        env:
+          VERSION: ${{ inputs.version }}
+        shell: python
+        run: |
+          import hashlib
+          import os
+          import re
+          import sys
+          import urllib.request
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          stable_version = r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)"
+          if not re.fullmatch(stable_version, version):
+              sys.exit("version must be a stable semantic version (X.Y.Z)")
+
+          path = Path("Formula/vector.rb")
+          formula = path.read_text()
+          version_pattern = r'(?m)^([ \t]*)version "([^\"]+)"[ \t]*$'
+          versions = re.findall(version_pattern, formula)
+          if len(versions) != 1 or not re.fullmatch(stable_version, versions[0][1]):
+              sys.exit("Formula must contain exactly one stable Vector version")
+          current = versions[0][1]
+          if tuple(map(int, current.split("."))) >= tuple(map(int, version.split("."))):
+              print(f"Formula already has Vector {current}; skipping {version}.")
+              sys.exit(0)
+
+          # Intel stays pinned to its last supported release. Only ARM64 is updated.
+          url = f"https://install.datadoghq.com/vector/{version}/vector-{version}-arm64-apple-darwin.tar.gz"
+          digest = hashlib.sha256()
+          # urlopen raises on HTTP errors; never publish a checksum of an error page.
+          with urllib.request.urlopen(url, timeout=60) as package:
+              while chunk := package.read(1024 * 1024):
+                  digest.update(chunk)
+
+          replacements = [
+              (version_pattern, rf'\g<1>version "{version}"'),
+              (r'(?m)^([ \t]*)url "[^\"]+" # arm64 url[ \t]*$', rf'\g<1>url "{url}" # arm64 url'),
+              (r'(?m)^([ \t]*)sha256 "[^\"]+" # arm64 sha256[ \t]*$', rf'\g<1>sha256 "{digest.hexdigest()}" # arm64 sha256'),
+          ]
+          for pattern, replacement in replacements:
+              formula, count = re.subn(pattern, replacement, formula)
+              if count != 1:
+                  sys.exit("Formula must contain exactly one version, ARM64 URL, and ARM64 checksum")
+          path.write_text(formula)
+          print(f"Updated Vector to {version}.")
+
+      - name: Check formula syntax
+        run: ruby -c Formula/vector.rb
+
+      - name: Commit formula to default branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          git add -- Formula/vector.rb
+          if git diff --cached --quiet; then
+            echo "Formula already includes Vector $VERSION; nothing to commit." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          current=$(git ls-remote "$remote" "refs/heads/$DEFAULT_BRANCH")
+          current=${current%%$'\t'*}
+          [[ "$current" == "$BASE_SHA" ]] || {
+            echo "The default branch moved; re-run this workflow." >&2
+            exit 1
+          }
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(releasing): bump Vector to $VERSION"
+          # Reject concurrent changes rather than rebasing or force-pushing.
+          git push "$remote" "HEAD:refs/heads/$DEFAULT_BRANCH"
+          echo "Released Vector $VERSION to Homebrew on $DEFAULT_BRANCH." >> "$GITHUB_STEP_SUMMARY"
