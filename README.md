@@ -20,7 +20,3 @@ and commits directly to this repository's default branch. The Intel package stay
 Equal or older versions are skipped. Concurrent branch changes stop the release instead of being overwritten.
 
 To retry manually, run **Release Vector** with `version` set to the stable Vector version (`X.Y.Z`).
-
-The `vectordotdev-bot` GitHub App used by Vector must be installed on this repository with **Actions: write** permission
-to dispatch the workflow. The workflow itself uses this repository's `GITHUB_TOKEN` with **Contents: write** permission;
-no additional bot secrets are needed here.
