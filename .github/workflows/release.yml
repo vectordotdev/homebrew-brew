@@ -1,0 +1,75 @@
+name: Release Vector
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Stable Vector version to release (X.Y.Z)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-vector
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'vectordotdev/homebrew-brew'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Record base
+        id: base
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Update Vector formula
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          VERSION: ${{ inputs.version }}
+        with:
+          script: |
+            await require("./.github/workflows/update-vector-formula.js")({ core, version: process.env.VERSION });
+
+      - name: Check formula syntax
+        run: ruby -c Formula/vector.rb
+
+      - name: Commit formula to default branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          git add -- Formula/vector.rb
+          if git diff --cached --quiet; then
+            echo "Formula already includes Vector $VERSION; nothing to commit." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          current=$(git ls-remote "$remote" "refs/heads/$DEFAULT_BRANCH")
+          current=${current%%$'\t'*}
+          [[ "$current" == "$BASE_SHA" ]] || {
+            echo "The default branch moved; re-run this workflow." >&2
+            exit 1
+          }
+
+          git config user.name "vic"
+          git config user.email "vector@datadoghq.com"
+          git commit -m "chore(releasing): bump Vector to $VERSION"
+          # Reject concurrent changes rather than rebasing or force-pushing.
+          git push "$remote" "HEAD:refs/heads/$DEFAULT_BRANCH"
+          echo "Released Vector $VERSION to Homebrew on $DEFAULT_BRANCH." >> "$GITHUB_STEP_SUMMARY"
