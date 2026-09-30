@@ -35,52 +35,65 @@ jobs:
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Update Vector formula
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           VERSION: ${{ inputs.version }}
-        shell: python
-        run: |
-          import hashlib
-          import os
-          import re
-          import sys
-          import urllib.request
-          from pathlib import Path
+        with:
+          script: |
+            const { createHash } = require("node:crypto");
+            const { readFile, writeFile } = require("node:fs/promises");
 
-          version = os.environ["VERSION"]
-          stable_version = r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)"
-          if not re.fullmatch(stable_version, version):
-              sys.exit("version must be a stable semantic version (X.Y.Z)")
+            const version = process.env.VERSION;
+            const stableVersion = /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/;
+            if (!version || stableVersion.exec(version)?.[0] !== version) {
+              throw new Error("version must be a stable semantic version (X.Y.Z)");
+            }
 
-          path = Path("Formula/vector.rb")
-          formula = path.read_text()
-          version_pattern = r'(?m)^([ \t]*)version "([^\"]+)"[ \t]*$'
-          versions = re.findall(version_pattern, formula)
-          if len(versions) != 1 or not re.fullmatch(stable_version, versions[0][1]):
-              sys.exit("Formula must contain exactly one stable Vector version")
-          current = versions[0][1]
-          if tuple(map(int, current.split("."))) >= tuple(map(int, version.split("."))):
-              print(f"Formula already has Vector {current}; skipping {version}.")
-              sys.exit(0)
+            const path = "Formula/vector.rb";
+            let formula = await readFile(path, "utf8");
+            const versionPattern = /^([ \t]*)version "([^"]+)"[ \t]*$/gm;
+            const versions = [...formula.matchAll(versionPattern)];
+            if (versions.length !== 1 || stableVersion.exec(versions[0][2])?.[0] !== versions[0][2]) {
+              throw new Error("Formula must contain exactly one stable Vector version");
+            }
+            const current = versions[0][2];
+            const currentParts = current.split(".").map(BigInt);
+            const requestedParts = version.split(".").map(BigInt);
+            const difference = currentParts.findIndex((part, index) => part !== requestedParts[index]);
+            if (difference === -1 || currentParts[difference] > requestedParts[difference]) {
+              core.info(`Formula already has Vector ${current}; skipping ${version}.`);
+              return;
+            }
 
-          # Intel stays pinned to its last supported release. Only ARM64 is updated.
-          url = f"https://install.datadoghq.com/vector/{version}/vector-{version}-arm64-apple-darwin.tar.gz"
-          digest = hashlib.sha256()
-          # urlopen raises on HTTP errors; never publish a checksum of an error page.
-          with urllib.request.urlopen(url, timeout=60) as package:
-              while chunk := package.read(1024 * 1024):
-                  digest.update(chunk)
+            // Intel stays pinned to its last supported release. Only ARM64 is updated.
+            const url = `https://install.datadoghq.com/vector/${version}/vector-${version}-arm64-apple-darwin.tar.gz`;
+            const response = await fetch(url, { signal: AbortSignal.timeout(60_000) });
+            // fetch does not reject HTTP errors; never publish a checksum of an error page.
+            if (!response.ok) {
+              throw new Error(`Failed to download ${url}: HTTP ${response.status}`);
+            }
+            const digest = createHash("sha256");
+            for await (const chunk of response.body) {
+              digest.update(chunk);
+            }
 
-          replacements = [
-              (version_pattern, rf'\g<1>version "{version}"'),
-              (r'(?m)^([ \t]*)url "[^\"]+" # arm64 url[ \t]*$', rf'\g<1>url "{url}" # arm64 url'),
-              (r'(?m)^([ \t]*)sha256 "[^\"]+" # arm64 sha256[ \t]*$', rf'\g<1>sha256 "{digest.hexdigest()}" # arm64 sha256'),
-          ]
-          for pattern, replacement in replacements:
-              formula, count = re.subn(pattern, replacement, formula)
-              if count != 1:
-                  sys.exit("Formula must contain exactly one version, ARM64 URL, and ARM64 checksum")
-          path.write_text(formula)
-          print(f"Updated Vector to {version}.")
+            const replacements = [
+              [versionPattern, `version "${version}"`],
+              [/^([ \t]*)url "[^"]+" # arm64 url[ \t]*$/gm, `url "${url}" # arm64 url`],
+              [/^([ \t]*)sha256 "[^"]+" # arm64 sha256[ \t]*$/gm, `sha256 "${digest.digest("hex")}" # arm64 sha256`],
+            ];
+            for (const [pattern, replacement] of replacements) {
+              let count = 0;
+              formula = formula.replace(pattern, (_match, indent) => {
+                count += 1;
+                return indent + replacement;
+              });
+              if (count !== 1) {
+                throw new Error("Formula must contain exactly one version, ARM64 URL, and ARM64 checksum");
+              }
+            }
+            await writeFile(path, formula);
+            core.info(`Updated Vector to ${version}.`);
 
       - name: Check formula syntax
         run: ruby -c Formula/vector.rb
