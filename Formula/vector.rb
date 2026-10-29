@@ -1,7 +1,7 @@
 class Vector < Formula
   desc "A High-Performance Log, Metrics, and Events Router"
   homepage "https://github.com/timberio/vector"
-  version "0.60.0"
+  version "0.61.0"
 
   on_macos do
     on_intel do
@@ -10,8 +10,8 @@ class Vector < Formula
     end
 
     on_arm do
-      url "https://install.datadoghq.com/vector/0.60.0/vector-0.60.0-arm64-apple-darwin.tar.gz" # arm64 url
-      sha256 "aa5c9d89416b39f1a90a7f1a088a9ecbb8c8c3a5669fb86609c9d4a958fe1a28" # arm64 sha256
+      url "https://install.datadoghq.com/vector/0.61.0/vector-0.61.0-arm64-apple-darwin.tar.gz" # arm64 url
+      sha256 "5e747594bb12c8d9ab85c16f2fb5e9fa35bc92911e17099a9721f7d833ae3503" # arm64 sha256
     end
   end
 
